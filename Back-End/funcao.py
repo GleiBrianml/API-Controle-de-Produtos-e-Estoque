@@ -65,7 +65,7 @@ def atualizar_produto(id_produto, novo_preco, nova_quantidade):
             cursor.close()
             conexao.close()
 
-def deletar_produto(id_produto):
+def deletar_produtos(id_produto):
     conexao,cursor = conectar()
     if conexao:
         try:
@@ -80,12 +80,12 @@ def deletar_produto(id_produto):
             cursor.close()
             conexao.close()
 
-def buscar_quantidade(id_produto):
+def buscar_quantidade_e_preco(id_produto):
     conexao,cursor = conectar()
     if conexao:
         try:
             cursor.execute(
-                "SELECT nome, quantidade FROM produtos WHERE id = %s",
+                "SELECT preco, quantidade FROM produtos WHERE id = %s",
                 (id_produto,)
             )
             return cursor.fetchone()
@@ -95,4 +95,4 @@ def buscar_quantidade(id_produto):
             cursor.close()
             conexao.close()
 
-print(buscar_quantidade(1))
+print(buscar_quantidade_e_preco(1))
