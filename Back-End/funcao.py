@@ -19,7 +19,7 @@ def criar_tabela():
         finally:
             cursor.close()
             conexao.close()
-criar_tabela()
+
 def inserir_produto(nome, categoria, preco, quantidade):
     conexao,cursor = conectar()
     if conexao:
@@ -49,15 +49,13 @@ def listar_produtos():
             cursor.close()
             conexao.close()
         
-def atualizar_produto(id_produto, novo_preco, nova_quantidade):
+def atualizar_produto(id_produto, novo_preco):
     conexao,cursor = conectar()
     if conexao:
         try:
             cursor.execute(
-                "UPDATE produtos SET preco = %s, quantidade = %s WHERE id = %s", 
-                    (novo_preco,nova_quantidade,id_produto)
-                
-            )
+    "UPDATE produtos SET preco = %s WHERE id = %s", 
+    (novo_preco, id_produto))
             conexao.commit()
         except Exception as erro:
             print(f'Erro ao tentar atualizar o produto {erro}')
@@ -65,20 +63,26 @@ def atualizar_produto(id_produto, novo_preco, nova_quantidade):
             cursor.close()
             conexao.close()
 
-def deletar_produtos(id_produto):
-    conexao,cursor = conectar()
+def deletar_produtos(id_produto: int):
+    conexao, cursor = conectar()
     if conexao:
         try:
             cursor.execute(
                 "DELETE FROM produtos WHERE id = %s", 
-                    (id_produto,)    
+                (id_produto,)
             )
             conexao.commit()
+            if cursor.rowcount > 0:
+                return True
+            else:
+                return False
         except Exception as erro:
-            print(f'Erro ao tentar deletar o produto {erro}')
+            print(f"Erro ao tentar deletar o produto: {erro}")
+            return False
         finally:
             cursor.close()
             conexao.close()
+
 
 def buscar_quantidade_e_preco(id_produto):
     conexao,cursor = conectar()
@@ -91,8 +95,23 @@ def buscar_quantidade_e_preco(id_produto):
             return cursor.fetchone()
         except Exception as erro:
             print(f"Erro ao buscar o produto {erro}")
+            return []
         finally:
             cursor.close()
             conexao.close()
 
-print(buscar_quantidade_e_preco(1))
+def buscar_produto_por_id(id_produto):
+    conexao, cursor = conectar()
+    if conexao:
+        try:
+            cursor.execute(
+                "SELECT * FROM produtos WHERE id = %s",
+                (id_produto,)
+            )
+            return cursor.fetchone()  # Retorna a linha correspondente ao produto
+        except Exception as erro:
+            print(f"Erro ao buscar o produto por ID {erro}")
+            return None
+        finally:
+            cursor.close()
+            conexao.close()
