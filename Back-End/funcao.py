@@ -80,4 +80,19 @@ def deletar_produto(id_produto):
             cursor.close()
             conexao.close()
 
-deletar_produto(1)
+def buscar_quantidade(id_produto):
+    conexao,cursor = conectar()
+    if conexao:
+        try:
+            cursor.execute(
+                "SELECT nome, quantidade FROM produtos WHERE id = %s",
+                (id_produto,)
+            )
+            return cursor.fetchone()
+        except Exception as erro:
+            print(f"Erro ao buscar o produto {erro}")
+        finally:
+            cursor.close()
+            conexao.close()
+
+print(buscar_quantidade(1))
