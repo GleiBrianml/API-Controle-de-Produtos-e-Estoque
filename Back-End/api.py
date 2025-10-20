@@ -12,5 +12,8 @@ app = FastAPI(title="Gerenciador de Estoque e Produtos")
 def home():
     return {"mensagem": "Bem-vindos ao gerenciador de estoque"}
 
-
+@app.post("/produto")
+def inserir_produtos(nome:str, categoria:str , preco:float , quantidade:float):
+    funcao.inserir_produto(nome, categoria, preco, quantidade)
+    return {"mensagem": "Produto adcionado com sucesso!"}
 
