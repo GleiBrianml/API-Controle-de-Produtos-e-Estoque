@@ -10,7 +10,7 @@ st.set_page_config(page_title="Gerenciador de Estoque", page_icon="🚛")
 st.title("📦 Gerenciador de Estoque")
 
 #Menu lateral
-menu = st.sidebar.radio("Navegação", ["Catalogo", "Adicionar produtos", "Atualizar produtos"])
+menu = st.sidebar.radio("Navegação", ["Catalogo", "Adicionar produto", "Atualizar produto"])
 
 if menu == "Catalogo":
     st.subheader("Todos os produtos disponiveis")
@@ -19,19 +19,51 @@ if menu == "Catalogo":
         produtos = response.json().get("produtos", [])
         if produtos:
             st.dataframe(produtos)
+        else:
+            st.info("Nenhum produto cadastrado no momento.")
     else:
         st.error("Erro ao acessar a API")
 
-elif menu == "Adicionar produto":
+
+if menu == "Adicionar produto":
     st.subheader("➕ Adicionar produtos")
     nome = st.text_input("Nome do produto")
     categoria = st.text_input("Categoria do produto")
     preco = st.number_input("Preço do produto", step=0.5)
     quantidade = st.number_input("Quantidade", step=1)
     if st.button("Salvar Produto"):
-        dados = {"nome": nome, "categoria":categoria, "preco":preco, "quantidade": quantidade}
-        response = requests.post(f"{API_URL}/filmes", params=dados)
+        dados = {"nome": nome, "categoria": categoria, "preco": preco, "quantidade": quantidade}
+        response = requests.post(f"{API_URL}/produto", json=dados)
         if response.status_code == 200:
-            st.success("Filme adicionando com sucesso!")
+            st.success("Produto adicionado com sucesso!")
         else:
-            st.error("Erro ao adicionar o filme")
+            st.error("Erro ao adicionar o produto")
+
+
+
+elif menu == "Atualizar produto":
+    st.subheader("🔁 Atualizar produtos")
+    id_produto = st.number_input("Id do produto", min_value=0, step=1)
+
+    if id_produto > 0:
+        # Consulta o produto para verificar se existe
+        response = requests.get(f"{API_URL}/produto/{id_produto}")
+        if response.status_code == 200:
+            produto = response.json()
+            if produto:
+                st.write(f"Produto: {produto.get('nome')} - Categoria: {produto.get('categoria')}")
+                preco = st.number_input("Preço em R$", min_value=0.0, value=produto.get('preco', 0.0), step=0.1)
+                quantidade = st.number_input("Quantidade desse produto", min_value=1, value=produto.get('quantidade', 1), step=1)
+                if st.button("Salvar Produto"):
+                    dados = {"preco": preco, "quantidade": quantidade}
+                    response_update = requests.put(f"{API_URL}/produto/{id_produto}", json=dados)
+                    if response_update.status_code == 200:
+                        st.success("Produto atualizado com sucesso!")
+                    else:
+                        st.error("Erro ao atualizar o produto.")
+            else:
+                st.warning("Produto não encontrado.")
+        else:
+            st.error("Erro ao consultar o produto.")
+    else:
+        st.info("Informe um ID válido para buscar o produto.")
