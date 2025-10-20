@@ -22,3 +22,16 @@ if menu == "Catalogo":
     else:
         st.error("Erro ao acessar a API")
 
+elif menu == "Adicionar produto":
+    st.subheader("➕ Adicionar produtos")
+    nome = st.text_input("Nome do produto")
+    categoria = st.text_input("Categoria do produto")
+    preco = st.number_input("Preço do produto", step=0.5)
+    quantidade = st.number_input("Quantidade", step=1)
+    if st.button("Salvar Produto"):
+        dados = {"nome": nome, "categoria":categoria, "preco":preco, "quantidade": quantidade}
+        response = requests.post(f"{API_URL}/filmes", params=dados)
+        if response.status_code == 200:
+            st.success("Filme adicionando com sucesso!")
+        else:
+            st.error("Erro ao adicionar o filme")
