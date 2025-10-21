@@ -64,3 +64,13 @@ def deletar_produto(id_produto: int):
     else:
         return {"erro": "Não foi possível deletar o produto"}
 
+@app.get("/buscar")
+def buscar_quantidade(id_produto: int):
+    produto = funcao.buscar_quantidade(id_produto)
+    if produto:
+        return {
+            "produto": {
+                "nome": produto[0],
+                "quantidade": produto[1]
+            }
+        }
