@@ -10,7 +10,7 @@ st.set_page_config(page_title="Gerenciador de Estoque", page_icon="🚛")
 st.title("📦 Gerenciador de Estoque")
 
 #Menu lateral
-menu = st.sidebar.radio("Navegação", ["Catalogo", "Adicionar produto", "Atualizar produto", "Deletar produto"])
+menu = st.sidebar.radio("Navegação", ["Catalogo", "Adicionar produto", "Atualizar produto","Buscar Estoque", "Deletar produto"])
 
 if menu == "Catalogo":
     st.subheader("Todos os produtos disponiveis")
@@ -33,7 +33,7 @@ elif menu == "Adicionar produto":
     quantidade = st.number_input("Quantidade", step=1)
     if st.button("Salvar Produto"):
         dados = {"nome": nome, "categoria":categoria, "preco":preco, "quantidade": quantidade}
-        response = requests.post(f"{API_URL}/produto", json=dados)
+        response = requests.post(f"{API_URL}/produto", params=dados)
         if response.status_code == 200:
             st.success("Produto adicionando com sucesso!")
         else:
@@ -52,6 +52,25 @@ elif menu == "Atualizar produto":
             st.success("Produto atualizado com sucesso!")
         else:
             st.error("Erro ao atualizar produto")
+
+elif menu == "Buscar Estoque":
+    st.subheader(" 🛒 Buscar no Estoque ")
+    id_produto = st.number_input("Digite o ID do produto para busca-lo:", min_value=1, step=1)
+    if st.button("Buscar produto"):
+        if id_produto > 0:
+            url = f"{API_URL}/buscar"
+            response = requests.get(url, params={"id_produto": id_produto})
+            if response.status_code == 200:
+                produto = response.json().get("produto")  
+                if produto:
+                    st.write("Produto encontrado:")
+                    st.dataframe(produto)
+                    st.success("Produto encontrado com sucesso!")
+                else:
+                    st.warning("Produto não encontrado.")
+        else:
+            st.error("Digite um ID de produto válido (maior que 0).")
+
 
 
 if menu == "Deletar produto":
