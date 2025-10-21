@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-
+import pandas as pd
 #URL da API FastAPI
 API_URL = "http://127.0.0.1:8000"
 
@@ -44,14 +44,37 @@ elif menu == "Adicionar produto":
 elif menu == "Atualizar produto":
     st.subheader("🔁 Atualizar Produtos")
     id_produtos = st.number_input("Id do Produto", min_value=1, step=1)
-    preco = st.number_input("Preço do produto atualizado", step=0.5)
-    if st.button("Salvar Produto"):
-        dados = {"id":id_produtos ,"preco":preco}
-        response = requests.put(f"{API_URL}/produtos/{id_produtos}", params=dados)
+
+    if id_produtos > 0:
+        # Buscar dados do produto
+        response = requests.get(f"{API_URL}/produto/{id_produtos}")
         if response.status_code == 200:
-            st.success("Produto atualizado com sucesso!")
+            produto = response.json()
+            if "erro" not in produto:
+                # Mostrar apenas o nome e o preço atual
+                dados = {
+                    "Nome": [produto["nome"]],
+                    "Preço atual (R$)": [produto["preco"]]
+                }
+                df = pd.DataFrame(dados)
+                st.dataframe(df)
+
+                # Campo para novo preço
+                preco = st.number_input("Novo preço do produto", step=0.5, value=produto["preco"])
+
+                if st.button("Salvar Produto"):
+                    response = requests.put(
+                        f"{API_URL}/produtos/{id_produtos}",
+                        params={"novo_preco": preco}
+                    )
+                    if response.status_code == 200:
+                        st.success("Produto atualizado com sucesso!")
+                    else:
+                        st.error("Erro ao atualizar produto")
+            else:
+                st.warning("Produto não encontrado.")
         else:
-            st.error("Erro ao atualizar produto")
+            st.error("Erro ao consultar o produto.")
 
 elif menu == "Buscar Estoque":
     st.subheader(" 🛒 Buscar no Estoque ")
@@ -78,12 +101,19 @@ if menu == "Deletar produto":
     id_produto = st.number_input("Id do produto para deletar", min_value=1, step=1)
 
     if id_produto > 0:
-        # Consulta o produto para verificar se existe
         response = requests.get(f"{API_URL}/produto/{id_produto}")
         if response.status_code == 200:
             produto = response.json()
-            if "erro" not in produto:  # Verifica se não ocorreu erro ao buscar
-                st.write(f"Produto: {produto['nome']} - Categoria: {produto['categoria']} - Preço: R$ {produto['preco']} - Quantidade: {produto['quantidade']}")
+            if "erro" not in produto:
+                dados = {
+                    "Nome": [produto['nome']],
+                    "Categoria": [produto['categoria']],
+                    "Preço (R$)": [produto['preco']],
+                    "Quantidade": [produto['quantidade']]
+                }
+                df_produto = pd.DataFrame(dados)
+                st.dataframe(df_produto)
+
                 if st.button("Deletar Produto"):
                     response_delete = requests.delete(f"{API_URL}/deletar/{id_produto}")
                     if response_delete.status_code == 200:
