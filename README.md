@@ -33,6 +33,10 @@ DB_PORT=5432
 ```bash
 python -m streamlit run app.py
 ```
+### Rodar api
+```bash
+python -m uvicorn api:app --reload
+```
 
 ### Funcionalidades
 
